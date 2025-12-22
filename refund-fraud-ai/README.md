@@ -15,6 +15,8 @@ cd "J:\AI-Based Detection of Refund Fraud Using Generated Images in Food Deliver
 
 step:2 Activate Virtual Environment
 
+python -m venv venv
+
 venv\Scripts\activate
 
 step:3 Install Dependencies (One Time)
