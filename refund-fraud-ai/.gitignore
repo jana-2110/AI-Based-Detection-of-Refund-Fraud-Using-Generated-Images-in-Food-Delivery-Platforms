@@ -5,9 +5,6 @@ venv/
 __pycache__/
 *.pyc
 
-# Dataset (optional – usually not uploaded)
-dataset/
-
 # Model files (large)
 model/*.h5
 
