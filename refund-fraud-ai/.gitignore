@@ -14,3 +14,6 @@ model/*.h5
 # OS files
 .DS_Store
 Thumbs.db
+
+# Temporary uploaded files
+temp_*
