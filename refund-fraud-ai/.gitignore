@@ -1,0 +1,16 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Dataset (optional – usually not uploaded)
+dataset/
+
+# Model files (large)
+model/*.h5
+
+# OS files
+.DS_Store
+Thumbs.db

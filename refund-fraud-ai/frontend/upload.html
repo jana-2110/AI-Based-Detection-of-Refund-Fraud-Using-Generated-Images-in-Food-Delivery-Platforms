@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Refund Fraud Detector</title>
+</head>
+<body>
+  <h2>Upload Refund Image</h2>
+
+  <input type="file" id="file">
+  <button onclick="send()">Check</button>
+
+  <p id="result"></p>
+
+  <script>
+    async function send() {
+      let file = document.getElementById("file").files[0];
+      let form = new FormData();
+      form.append("file", file);
+
+      let res = await fetch("http://127.0.0.1:8000/check-refund", {
+        method: "POST",
+        body: form
+      });
+
+      let data = await res.json();
+      document.getElementById("result").innerText =
+        `Result: ${data.result} | Confidence: ${data.confidence}`;
+    }
+  </script>
+</body>
+</html>
