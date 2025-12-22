@@ -2,7 +2,7 @@ def calculate_fraud_score(
     ai_prob,
     reused,
     exif_mismatch=False,
-    user_history_score=0
+    user_history_score=0.0
 ):
     score = 0
 

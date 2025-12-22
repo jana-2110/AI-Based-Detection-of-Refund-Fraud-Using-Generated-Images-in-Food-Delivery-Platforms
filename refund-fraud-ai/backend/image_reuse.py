@@ -17,7 +17,8 @@ def is_image_reused(image_path, threshold=5):
         hashes = f.readlines()
 
     for h in hashes:
-        diff = img_hash - imagehash.hex_to_hash(h.strip())
+        old_hash = imagehash.hex_to_hash(h.strip())
+        diff = img_hash - old_hash
         if diff <= threshold:
             return True, diff
 

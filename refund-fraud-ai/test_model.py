@@ -4,70 +4,44 @@ import tensorflow as tf
 from backend.image_reuse import is_image_reused
 from backend.fraud_score import calculate_fraud_score
 
-# =========================
-# CONFIG
-# =========================
 MODEL_PATH = "model/refund_fraud_detector.keras"
-IMAGE_PATH = "dataset/test/real/1000138967.jpg"  # change image here
+IMAGE_PATH = "dataset/test/real/sample.jpg"  # change image here
 IMG_SIZE = 224
-THRESHOLD = 0.6   # lowered threshold
+THRESHOLD = 0.6
 
-# =========================
-# LOAD MODEL
-# =========================
 print("🔄 Loading model...")
 model = tf.keras.models.load_model(MODEL_PATH)
-print("✅ Model loaded successfully")
+print("✅ Model loaded")
 
-# =========================
-# LOAD IMAGE
-# =========================
 img = cv2.imread(IMAGE_PATH)
-
 if img is None:
-    raise ValueError("❌ Image not found or path incorrect")
+    raise ValueError("❌ Image not found")
 
 img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
 img = img / 255.0
 img = np.expand_dims(img, axis=0)
 
-# =========================
-# MODEL PREDICTION
-# =========================
 prediction = model.predict(img)[0][0]
-ai_probability = float(prediction)
+ai_prob = float(prediction)
 
-print(f"\n🧠 AI Probability: {ai_probability:.2f}")
+print(f"\n🧠 AI Probability: {ai_prob:.2f}")
 
-# =========================
-# IMAGE REUSE CHECK
-# =========================
 reused, diff = is_image_reused(IMAGE_PATH)
+print("⚠️ Image reused" if reused else "✅ Image not reused")
 
-if reused:
-    print(f"⚠️ Image Reuse Detected (hash diff = {diff})")
-else:
-    print("✅ Image is not reused")
-
-# =========================
-# FRAUD SCORE
-# =========================
 fraud_score = calculate_fraud_score(
-    ai_prob=ai_probability,
+    ai_prob=ai_prob,
     reused=reused,
-    exif_mismatch=False,      # future extension
-    user_history_score=0.3    # mock value
+    exif_mismatch=False,
+    user_history_score=0.3
 )
 
 print(f"\n🚨 Fraud Score: {fraud_score}/100")
 
-# =========================
-# FINAL DECISION
-# =========================
 if fraud_score >= 70:
-    decision = "❌ REFUND DENIED (HIGH FRAUD RISK)"
+    decision = "❌ REFUND DENIED"
 elif fraud_score >= 40:
-    decision = "⚠️ MANUAL REVIEW REQUIRED"
+    decision = "⚠️ MANUAL REVIEW"
 else:
     decision = "✅ REFUND APPROVED"
 

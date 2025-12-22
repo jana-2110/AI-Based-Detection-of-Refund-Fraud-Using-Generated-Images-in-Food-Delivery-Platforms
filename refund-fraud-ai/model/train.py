@@ -6,7 +6,7 @@ from tensorflow.keras.models import Model
 
 IMG_SIZE = 224
 BATCH_SIZE = 8
-EPOCHS = 25   # increased
+EPOCHS = 25
 
 train_dir = "dataset/train"
 val_dir = "dataset/validation"
@@ -26,14 +26,14 @@ train_data = train_gen.flow_from_directory(
     train_dir,
     target_size=(IMG_SIZE, IMG_SIZE),
     batch_size=BATCH_SIZE,
-    class_mode='binary'
+    class_mode="binary"
 )
 
 val_data = val_gen.flow_from_directory(
     val_dir,
     target_size=(IMG_SIZE, IMG_SIZE),
     batch_size=BATCH_SIZE,
-    class_mode='binary'
+    class_mode="binary"
 )
 
 base_model = EfficientNetB0(
@@ -42,31 +42,30 @@ base_model = EfficientNetB0(
     input_shape=(IMG_SIZE, IMG_SIZE, 3)
 )
 
-# 🔒 Freeze base model first
 base_model.trainable = False
 
 x = base_model.output
 x = GlobalAveragePooling2D()(x)
-x = Dense(256, activation='relu')(x)
+x = Dense(256, activation="relu")(x)
 x = Dropout(0.5)(x)
-output = Dense(1, activation='sigmoid')(x)
+output = Dense(1, activation="sigmoid")(x)
 
 model = Model(inputs=base_model.input, outputs=output)
 
 model.compile(
     optimizer=tf.keras.optimizers.Adam(1e-4),
-    loss='binary_crossentropy',
-    metrics=['accuracy']
+    loss="binary_crossentropy",
+    metrics=["accuracy"]
 )
 
 model.fit(train_data, validation_data=val_data, epochs=EPOCHS)
 
-# 🔓 Fine-tuning (VERY IMPORTANT)
+# Fine-tuning
 base_model.trainable = True
 model.compile(
     optimizer=tf.keras.optimizers.Adam(1e-5),
-    loss='binary_crossentropy',
-    metrics=['accuracy']
+    loss="binary_crossentropy",
+    metrics=["accuracy"]
 )
 
 model.fit(train_data, validation_data=val_data, epochs=10)
