@@ -2,14 +2,27 @@ from PIL import Image
 import imagehash
 import os
 
-def is_reused(image_path, db="backend/stored_images"):
-    os.makedirs(db, exist_ok=True)
-    new_hash = imagehash.phash(Image.open(image_path))
+HASH_DB = "hash_db.txt"
 
-    for img in os.listdir(db):
-        old_hash = imagehash.phash(Image.open(f"{db}/{img}"))
-        if abs(new_hash - old_hash) < 8:
-            return True
+def is_image_reused(image_path, threshold=5):
+    img = Image.open(image_path)
+    img_hash = imagehash.phash(img)
 
-    Image.open(image_path).save(f"{db}/{os.path.basename(image_path)}")
-    return False
+    if not os.path.exists(HASH_DB):
+        with open(HASH_DB, "w") as f:
+            f.write(str(img_hash) + "\n")
+        return False, 0
+
+    with open(HASH_DB, "r") as f:
+        hashes = f.readlines()
+
+    for h in hashes:
+        old_hash = imagehash.hex_to_hash(h.strip())
+        diff = img_hash - old_hash
+        if diff <= threshold:
+            return True, diff
+
+    with open(HASH_DB, "a") as f:
+        f.write(str(img_hash) + "\n")
+
+    return False, 0

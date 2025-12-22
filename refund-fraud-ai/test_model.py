@@ -1,39 +1,48 @@
-import tensorflow as tf
 import cv2
 import numpy as np
-import os
+import tensorflow as tf
+from backend.image_reuse import is_image_reused
+from backend.fraud_score import calculate_fraud_score
 
-print("Loading model...")
-model = tf.keras.models.load_model("model/detector.h5")
-print("✅ Model loaded successfully")
+MODEL_PATH = "model/refund_fraud_detector.keras"
+IMAGE_PATH = "dataset/test/real/1000138967.jpg"  # change image here
+IMG_SIZE = 224
+THRESHOLD = 0.6
 
-folder = "dataset/train/real"
-files = os.listdir(folder)
+print("🔄 Loading model...")
+model = tf.keras.models.load_model(MODEL_PATH)
+print("✅ Model loaded")
 
-if len(files) == 0:
-    print("❌ No images found in", folder)
-    exit()
-
-image_path = os.path.join(folder, files[0])
-print("Using image:", image_path)
-
-img = cv2.imread(image_path)
-
+img = cv2.imread(IMAGE_PATH)
 if img is None:
-    print("❌ OpenCV could not read the image")
-    exit()
+    raise ValueError("❌ Image not found")
 
-img = cv2.resize(img, (224,224))
+img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
 img = img / 255.0
 img = np.expand_dims(img, axis=0)
 
-pred = model.predict(img)[0][0]
+prediction = model.predict(img)[0][0]
+ai_prob = float(prediction)
 
-THRESHOLD = 0.6  # 🔥 lowered from 0.8
+print(f"\n🧠 AI Probability: {ai_prob:.2f}")
 
-if pred > THRESHOLD:
-    print("❌ AI GENERATED IMAGE")
+reused, diff = is_image_reused(IMAGE_PATH)
+print("⚠️ Image reused" if reused else "✅ Image not reused")
+
+fraud_score = calculate_fraud_score(
+    ai_prob=ai_prob,
+    reused=reused,
+    exif_mismatch=False,
+    user_history_score=0.3
+)
+
+print(f"\n🚨 Fraud Score: {fraud_score}/100")
+
+if fraud_score >= 70:
+    decision = "❌ REFUND DENIED"
+elif fraud_score >= 40:
+    decision = "⚠️ MANUAL REVIEW"
 else:
-    print("✅ REAL IMAGE")
+    decision = "✅ REFUND APPROVED"
 
-print("Confidence:", float(pred))
+print(f"\n📌 FINAL DECISION: {decision}")
