@@ -5,7 +5,7 @@ from backend.image_reuse import is_image_reused
 from backend.fraud_score import calculate_fraud_score
 
 MODEL_PATH = "model/refund_fraud_detector.keras"
-IMAGE_PATH = "dataset/test/real/sample.jpg"  # change image here
+IMAGE_PATH = "dataset/test/real/1000138967.jpg"  # change image here
 IMG_SIZE = 224
 THRESHOLD = 0.6
 
