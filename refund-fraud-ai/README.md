@@ -26,11 +26,19 @@ pip install python-multipart
 step:4 Train the Model (Optional)
 Run only if dataset is updated:
 
-python model\train.py
+cd src
+python train.
+python evaluate.py
+
+Note : predict.py is used for offline testing and debugging of the trained model
+cd src
+python predict.py
+
 
 step:5 Start Backend API
+cd ..
+uvicorn backend.api:app --
 
-uvicorn backend.api:app --reload
 Backend runs at:
 http://127.0.0.1:8000
 

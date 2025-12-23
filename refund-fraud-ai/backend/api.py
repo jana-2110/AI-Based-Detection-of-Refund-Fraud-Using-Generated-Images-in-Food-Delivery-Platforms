@@ -3,27 +3,36 @@ import shutil
 import tensorflow as tf
 import cv2
 import numpy as np
+import os
 
 app = FastAPI()
-model = tf.keras.models.load_model("model/detector.h5")
+
+# ✅ Load trained model (correct path)
+model = tf.keras.models.load_model("models/best_model.keras")
 
 @app.post("/check-refund")
 async def check_refund(file: UploadFile = File(...)):
-    path = f"temp_{file.filename}"
+    temp_path = f"temp_{file.filename}"
 
-    with open(path, "wb") as buffer:
+    # Save uploaded file
+    with open(temp_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    img = cv2.imread(path)
-    img = cv2.resize(img, (224,224))
+    # Read and preprocess image
+    img = cv2.imread(temp_path)
+    img = cv2.resize(img, (224, 224))
     img = img / 255.0
     img = np.expand_dims(img, axis=0)
 
-    pred = model.predict(img)[0][0]
+    # Predict
+    prob = model.predict(img)[0][0]
 
-    result = "AI_GENERATED" if pred > 0.6 else "REAL_IMAGE"
+    # Cleanup temp file
+    os.remove(temp_path)
+
+    result = "AI_GENERATED" if prob > 0.6 else "REAL_IMAGE"
 
     return {
         "result": result,
-        "confidence": float(pred)
+        "fraud_probability": round(float(prob), 3)
     }
